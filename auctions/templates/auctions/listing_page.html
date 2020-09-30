@@ -1,0 +1,89 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Listing: {{ listing.title }}</h2>
+
+    <div class=listing>
+
+    {% if listing.activity %}
+    <strong id='active'>ACTIVE</strong>
+    {% else %}
+    <strong id='not-active'>CLOSED</strong>
+        {% if user.is_authenticated and listing.winner == user %}
+            <h2>You are the winner of this auction!</h2>
+        {% endif %}
+    {% endif %}
+    <br>
+
+
+    {{ listing.description }}
+    <br>
+    <strong>Price: {{ listing.current_price }} $</strong>
+    <br>
+    Posted by: <a href='#'>{{ listing.author }}</a>
+    <br>
+    <img widht=300 height=300 src="{% static '' %}{{ listing.picture_url }}">
+    
+    {% if user.is_authenticated and listing.activity %}
+        <form action="{% url 'listing_page' listing.id %}" method='POST'>
+            {% csrf_token %}
+            <input type='submit' name='add-to-watchlist' value='Add the item to my Watchlist'>
+        </form>
+        
+        {% if listing.bids %}
+            <p>
+                {{ length_bids }} bid(s) so far.
+                {% if current_winner == user %}
+                    Your bid is the current bid.
+                {% elif length_bids == 0 %}
+
+                {% else %}
+                    Your bid is NOT the current bid.
+                {% endif %}
+            </p>
+        {% else %}
+            <p>No bids so far.</p>
+        {% endif %}
+    
+        <form action="{% url 'listing_page' listing.id %}" method='POST'>
+            {% csrf_token %}
+            <input type='number' name='bid' placeholder="Bid">
+            <input type='submit' name='bid-on-item' value='Place Bid'>
+        </form>
+
+        {% if user == listing.author %}
+
+        <form action="{% url 'listing_page' listing.id %}" method='POST'>
+            {% csrf_token %}
+            <input type='submit' name='close' value='Close Listing'>
+        </form>
+        {% endif %}
+
+        <form action="{% url 'listing_page' listing.id %}" method='POST' id='comment'>
+            {% csrf_token %}
+            <input type='submit' name='add-comment' value='Add comment'>
+        </form>
+        <textarea rows=5 cols=300 style='max-width: 100%;' name='comment-content' form='comment'> Add comment...</textarea>
+
+
+    {% endif %}
+    
+    {% if comments %}
+    {% for comment in comments %}
+    <div>
+        <a href='#'>{{ comment.author }}</a> on {{ comment.date_posted }}
+        <p>
+            {{ comment.content }}
+        </p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div>
+        No comments posted.
+    </div>
+    {% endif %}
+    </div>
+
+        
+    {% endblock %}
