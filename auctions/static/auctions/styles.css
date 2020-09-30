@@ -1,3 +1,46 @@
 body {
     padding: 10px;
 }
+
+#currency {
+    margin: 0px;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: right;
+}
+
+div.listing {
+    text-decoration: none;
+    background-color: rgb(247, 247, 247);
+
+}
+a.listing {
+    margin: 30px;
+}
+a.listing * {
+    text-decoration: none;
+    color: rgb(78, 78, 78);
+    margin: 5px
+}
+
+.listing:hover {
+    box-shadow: 10px 10px 5px grey;
+    text-decoration: none;
+    color: rgb(44, 44, 44)
+}
+ul, li{
+    list-style-type: none;
+}
+div.listing img {
+    border:rgb(78, 78, 78) solid 3px;
+    margin: 20px
+}
+
+#not-active {
+    background-color: rgb(163, 163, 163);
+    border: 3px solid black;
+    margin: 0;
+}
+#not-active *{
+    background-color: rgb(163, 163, 163);
+}

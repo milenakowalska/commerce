@@ -2,33 +2,35 @@
 {% load static %}
 
 {% block body %}
+    <img style='float:left;margin:30px' widht=300 height=300 src="{% static '' %}{{ listing.picture_url }}">
+
     <h2>Listing: {{ listing.title }}</h2>
 
-    <div class=listing>
+    <div >
 
     {% if listing.activity %}
-    <strong id='active'>ACTIVE</strong>
+    <span class="badge badge-success">ACTIVE</span>
     {% else %}
-    <strong id='not-active'>CLOSED</strong>
+    <span class="badge badge-danger">CLOSED</span>
         {% if user.is_authenticated and listing.winner == user %}
             <h2>You are the winner of this auction!</h2>
         {% endif %}
     {% endif %}
     <br>
 
-
+    <p class="article-content">
     {{ listing.description }}
+    </p>
     <br>
-    <strong>Price: {{ listing.current_price }} $</strong>
+    <strong style='font-size: 25px;'>Price: {{ listing.current_price }} $</strong>
     <br>
     Posted by: <a href='#'>{{ listing.author }}</a>
     <br>
-    <img widht=300 height=300 src="{% static '' %}{{ listing.picture_url }}">
     
     {% if user.is_authenticated and listing.activity %}
         <form action="{% url 'listing_page' listing.id %}" method='POST'>
             {% csrf_token %}
-            <input type='submit' name='add-to-watchlist' value='Add the item to my Watchlist'>
+            <input type='submit' class="btn btn-primary" name='add-to-watchlist' value='Add the item to my Watchlist'>
         </form>
         
         {% if listing.bids %}
@@ -49,30 +51,33 @@
         <form action="{% url 'listing_page' listing.id %}" method='POST'>
             {% csrf_token %}
             <input type='number' name='bid' placeholder="Bid">
-            <input type='submit' name='bid-on-item' value='Place Bid'>
+            <input type='submit' class="btn btn-primary" name='bid-on-item' value='Place Bid'>
         </form>
 
+
+        <textarea rows=5 cols=300 style='max-width: 100%;' name='comment-content' form='comment'> Add comment...</textarea>
+
+        <form action="{% url 'listing_page' listing.id %}" method='POST' id='comment'>
+            {% csrf_token %}
+            <input type='submit' class="btn btn-primary" name='add-comment' value='Add comment'>
+        </form>
+        <br>
         {% if user == listing.author %}
 
         <form action="{% url 'listing_page' listing.id %}" method='POST'>
             {% csrf_token %}
-            <input type='submit' name='close' value='Close Listing'>
+            <input type='submit' name='close' class="btn btn-secondary" value='Close this Listing'>
         </form>
         {% endif %}
 
-        <form action="{% url 'listing_page' listing.id %}" method='POST' id='comment'>
-            {% csrf_token %}
-            <input type='submit' name='add-comment' value='Add comment'>
-        </form>
-        <textarea rows=5 cols=300 style='max-width: 100%;' name='comment-content' form='comment'> Add comment...</textarea>
-
-
     {% endif %}
-    
+    <hr style='clear:left;'>
+    <h4 style='text-align: center;'>Comments</h4>
     {% if comments %}
     {% for comment in comments %}
-    <div>
-        <a href='#'>{{ comment.author }}</a> on {{ comment.date_posted }}
+    <hr>
+    <div >
+        <strong><a href='#'>{{ comment.author }}</a> on {{ comment.date_posted }}</strong>
         <p>
             {{ comment.content }}
         </p>

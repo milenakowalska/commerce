@@ -4,18 +4,22 @@
 {% block body %}
 
 
-    <h2>Active Listings</h2>
+    <h2 style='text-align: center;' >Active Listings</h2>
 
     <ul>
     {% for listing in listings %}
-        <a class='listing' href="{% url 'listing_page' listing.id %}">
-        <div class=listing><li><ul>  
-        <h3><li>{{ listing }}</li></h3>
-        <li> {{ listing.description }} </li>
-        <strong><li> Price: {{ listing.current_price }} $ </li></strong>
-        <li><img widht=200 height=200 src="{% static '' %}{{ listing.picture_url }}"></li>
-
-        </ul></li></div></a>
+    <article class="media content-section">
+        <div class="media-body">
+          <div class="article-metadata">
+            <a class='listing' href="{% url 'listing_page' listing.id %}">
+                <div class=listing><ul>  
+                <li style='float:left;'><img widht=200 height=200 src="{% static '' %}{{ listing.picture_url }}"></li>
+                <h3><li>{{ listing }}</li></h3>
+                <li> {{ listing.description }} </li>
+                <strong><li> Price: {{ listing.current_price }} $ </li></strong>
+        
+                </ul></div></a>
+            </div></div></article>
     {% empty %}
         <li>No active listings</li>
     {% endfor %}

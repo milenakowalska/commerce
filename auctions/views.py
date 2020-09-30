@@ -4,6 +4,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
 
 from .models import User, Category, Bid, Listing, Comment
 
@@ -21,7 +23,7 @@ def listing_page(request, listing_id):
             listing.save()
 
             context = {'listings' : Listing.objects.filter(activity=True).all(),
-                        'message' : 'Listing added to your Watchlist!'}
+                        'success_message' : 'Listing added to your Watchlist!'}
             return render(request, "auctions/index.html", context)
 
         if 'bid-on-item' in request.POST:
@@ -29,15 +31,16 @@ def listing_page(request, listing_id):
             bid = int(request.POST['bid'])
 
             if bid < listing.starting_bid or bid <= listing.current_price:
-                message = 'Wrong value! The bid must be at least as large as the starting bid, and must be greater than any other bids.'
-                
+                error_message = 'Wrong value! The bid must be at least as large as the starting bid, and must be greater than any other bids.'
+                success_message = None
             else:
                 new_bid = Bid.objects.create(author=request.user, value=bid)
                 new_bid.save()
                 listing.bids.add(new_bid)
                 listing.save()
 
-                message = 'You succesfully placed bid on this item!'
+                success_message = 'You succesfully placed bid on this item!'
+                error_message = None
                 
             try:
                 current_winner = listing.bids.last().author
@@ -46,9 +49,12 @@ def listing_page(request, listing_id):
             context = {'listing': listing,
             'length_bids': len(listing.bids.all()),
             'current_winner': current_winner,
-            'message': message,
             'comments':Comment.objects.filter(listing=listing).all()
             }
+            if success_message is not None:
+                context['success_message'] = success_message
+            elif error_message is not None:
+                context['error_message'] = error_message
             return render(request, "auctions/listing_page.html", context)
 
         if 'close' in request.POST:
@@ -81,7 +87,7 @@ def listing_page(request, listing_id):
                 listing = listing)
             new_comment.save()
 
-            message = 'Comment added!'
+            success_message = 'Comment added!'
             try:
                 current_winner = listing.bids.last().author
             except AttributeError:
@@ -90,7 +96,7 @@ def listing_page(request, listing_id):
             context = {'listing': listing,
             'length_bids': len(listing.bids.all()),
             'current_winner': current_winner,
-            'message': message,
+            'success_message': success_message,
             'comments':Comment.objects.filter(listing=listing).all()
             }
             return render(request, "auctions/listing_page.html", context)
@@ -134,7 +140,7 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
+                "error_message": "Invalid username and/or password."
             })
     else:
         return render(request, "auctions/login.html")
@@ -155,7 +161,7 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "error_message": "Passwords must match."
             })
 
         # Attempt to create new user
@@ -164,14 +170,14 @@ def register(request):
             user.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
-                "message": "Username already taken."
+                "error_message": "Username already taken."
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
 
-
+@login_required
 def create(request):
     if request.method == "POST":
         title = request.POST['title']
@@ -190,11 +196,11 @@ def create(request):
                 starting_bid=starting_bid
             )
             listing.save()
-            messages.success(request, 'Listing saved!')
+            success_messages.success(request, 'Listing saved!')
             return HttpResponseRedirect(reverse("index"))
         except:
             context = {
-                'message':'There was an issue creating this listing.',
+                'error_message':'There was an issue creating this listing.',
                 'categories' : Category.objects.all()
             }
             return render(request, "auctions/create.html", context)
@@ -207,6 +213,7 @@ def categories(request):
     context = {'categories' : Category.objects.all()}
     return render(request, "auctions/categories.html", context)
 
+@login_required
 def watchlist(request):
     user = request.user
     watched_listings = user.watched_listings.all()
@@ -214,5 +221,3 @@ def watchlist(request):
         'watched_listings':watched_listings
     })
 
-# def add_to_watchlist(request, listing_id):
-#     pass

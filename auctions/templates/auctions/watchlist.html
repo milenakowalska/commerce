@@ -8,24 +8,30 @@
 
         {% for listing in watched_listings %}
 
-        <a class='listing'  href="{% url 'listing_page' listing.id %}">
-            <div class=listing {% if not listing.activity %}id='not-active'{% endif %}><li><ul>  
-                {% if listing.activity %}
-                <strong id='active'>ACTIVE</strong>
-                {% else %}
-                <strong id='not-active'>CLOSED</strong>
-                    {% if user.is_authenticated and listing.winner == user %}
-                        <h2>You are the winner of this auction!</h2>
-                    {% endif %}
-                {% endif %}
-                <br>
 
-            <h3><li>{{ listing }}</li></h3>
-            <li> {{ listing.description }} </li>
-            <strong><li> Price: {{ listing.current_price }} $ </li></strong>
-            <li><img widht=200 height=200 src="{% static '' %}{{ listing.picture_url }}"></li>
-    
-            </ul></li></div></a>
+            <article class="media content-section">
+                <div class="media-body">
+                  <div class="article-metadata">
+                    <a class='listing' href="{% url 'listing_page' listing.id %}">
+                        <div class=listing {% if not listing.activity %}id='not-active'{% endif %}><ul>  
+                        <li style='float:left;'><img widht=200 height=200 src="{% static '' %}{{ listing.picture_url }}"></li>
+
+                        {% if listing.activity %}
+                        <span class="badge badge-success">ACTIVE</span>
+                        {% else %}
+                        <span class="badge badge-danger">CLOSED</span>
+                            {% if user.is_authenticated and listing.winner == user %}
+                                <h2>You are the winner of this auction!</h2>
+                            {% endif %}
+                        {% endif %}
+                        <br>
+                    
+                        <h3><li>{{ listing }}</li></h3>
+                        <li> {{ listing.description }} </li>
+                        <strong><li> Price: {{ listing.current_price }} $ </li></strong>
+                
+                        </ul></div></a>
+            </div></div></article>
         {% empty %}
             <li>No active listings</li>
         {% endfor %}
